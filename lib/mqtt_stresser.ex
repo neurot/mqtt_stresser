@@ -12,13 +12,9 @@ defmodule MqttStresser do
 
   def stress(count) do
     IO.puts("Sending #{inspect(count)} mqtt messages.")
-    Enum.each(1..count, fn x -> execute_stress(x) end)
+    Enum.each(1..count, fn _ -> spawn(fn -> MqttStresser.SendMqtt.send_dummy_message() end) end)
 
     IO.puts("Done.")
-  end
-
-  def execute_stress(_) do
-    spawn(fn -> MqttStresser.SendMqtt.send_dummy_message() end)
   end
 
   defmodule SendMqtt do
@@ -46,8 +42,6 @@ defmodule MqttStresser do
     end
 
     def send_dummy_message() do
-      # :timer.sleep Enum.random(0..5000)
-
       timestamp = DateTime.to_string(DateTime.utc_now())
       measure_value = Enum.random(1900..3000) / 100
 
