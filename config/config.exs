@@ -3,8 +3,7 @@
 use Mix.Config
 
 config :mqtt_stresser, MqttStresser,
-  # inspect(Enum.random(10000..60000)),
-  client_id: "enet-23232",
+  client_id: "enet-" <> inspect(Enum.random(10000..60000)),
   host: "localhost",
   port: 1883,
   ssl: false

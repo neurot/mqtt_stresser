@@ -14,17 +14,28 @@ defmodule MqttStresser do
 
   def stress(count) do
     IO.puts("Sending #{inspect(count)} mqtt messages.")
-    Enum.each(1..count, fn(x) -> execute_stress(x) end)
+    Enum.each(1..count, fn _ -> spawn(fn -> MqttStresser.SendMqtt.send_dummy_message() end) end)
 
     IO.puts("Done.")
   end
 
-  def execute_stress(_) do
-    spawn(fn -> MqttStresser.SendMqtt.send_dummy_message() end)
-  end
-
   defmodule SendMqtt do
     use Hulaaki.Client
+
+    def input_list() do
+      [
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae40",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae41",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae42",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae43",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae44",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae45",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae46",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae47",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae48",
+        "bfcb9574-55f3-11e8-8474-b8f6b115ae49"
+      ]
+    end
 
     def init() do
       {:ok, pid} = start_link(%{})
@@ -39,16 +50,14 @@ defmodule MqttStresser do
     end
 
     def send_dummy_message() do
-      timestamp = DateTime.utc_now()
+      timestamp = DateTime.to_string(DateTime.utc_now())
       measure_value = Enum.random(1900..3000) / 100
-
-      :timer.sleep Enum.random(0..1000)
 
       publish(
         :hulaaki_stresser,
         topic: "dataservice/input",
         message:
-          "{\"timestamp\": \"#{inspect(timestamp)}\",\"input_id\": \"bfcb9574-55f3-11e8-8474-b8f6b115ae49\",\"measure_value\": #{
+          "{\"timestamp\": \"#{timestamp}\",\"input_id\": \"#{Enum.random(input_list())}\",\"measure_value\": #{
             inspect(measure_value)
           }}",
         dup: 0,
