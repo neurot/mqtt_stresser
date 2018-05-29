@@ -7,6 +7,8 @@ defmodule MqttStresser do
 
   def init(state) do
     MqttStresser.SendMqtt.init()
+    {:ok, counter} = Agent.start(fn -> 0 end)
+    Process.register(counter, :counter)
     {:ok, state}
   end
 
@@ -28,6 +30,12 @@ defmodule MqttStresser do
       {:ok, pid} = start_link(%{})
       Process.register(pid, :hulaaki_stresser)
       connect_loop(pid)
+      subscriptions = [topics: ["input/#"], qoses: [1]]
+      subscribe(:hulaaki_stresser, subscriptions)
+    end
+
+    def on_subscribed_publish(_) do
+      Agent.update(:counter, &(&1 + 1))
     end
 
     def send_dummy_message() do
